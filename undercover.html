@@ -1,25 +1,1225 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Undercover v2.0</title></head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Undercover</title>
+<style>
+:root{--bg:#0a0a0f;--surface:#13131f;--surface2:#1c1c2e;--border:#2a2a42;--accent:#e63f6a;--accent2:#7c3aed;--citizen:#10b981;--uc:#e63f6a;--mw:#f59e0b;--text:#f0f0f8;--muted:#6b6b8a;--radius:16px;--font:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+.app{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column}
+.screen{display:none;flex-direction:column;flex:1;padding:24px 18px 40px}
+.screen.active{display:flex}
+.logo{font-weight:900;font-size:56px;letter-spacing:5px;line-height:1;text-align:center;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-weight:900;font-size:23px;letter-spacing:.4px;margin-bottom:12px}
+p{color:var(--muted);font-size:14px;line-height:1.6}
+.tagline{text-align:center;color:var(--muted);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.spacer{flex:1}.center{text-align:center}.mt{margin-top:10px}.mb{margin-bottom:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;display:block;text-align:center}
+.btn+.btn{margin-top:9px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-warn{background:rgba(245,158,11,.15);color:var(--mw);border:1px solid rgba(245,158,11,.3)}
+.btn-danger{background:rgba(230,63,106,.15);color:var(--accent);border:1px solid rgba(230,63,106,.3)}
+input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:16px;padding:12px 14px;outline:none}
+input:focus{border-color:var(--accent2)}
+input::placeholder{color:var(--muted)}
+.player-tag{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;margin-bottom:7px}
+.remove-btn{background:none;border:none;color:var(--accent);font-size:20px;cursor:pointer;padding:0 4px}
+.counter{display:flex;align-items:center;gap:12px}
+.counter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.counter-val{font-weight:900;font-size:28px;min-width:26px;text-align:center}
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle{position:relative;width:50px;height:28px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface2);border:1px solid var(--border);border-radius:28px;cursor:pointer}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--accent2);border-color:var(--accent2)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(22px);background:#fff}
+.uni-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}
+.uni-btn{background:var(--surface2);border:2px solid var(--border);border-radius:11px;padding:9px 5px;cursor:pointer;text-align:center;font-family:var(--font);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:4px}
+.uni-btn.sel{border-color:var(--accent2);background:rgba(124,58,237,.18)}
+.uni-emoji{font-size:22px;line-height:1}
+.uni-name{font-size:9px;font-weight:600;line-height:1.2;text-align:center}
+.grp-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border:2px solid var(--border);border-radius:12px;cursor:pointer;margin-bottom:0}
+.grp-bar.on{border-color:var(--accent2)}
+.sw{width:44px;height:24px;border:2px solid var(--border);border-radius:24px;position:relative;flex-shrink:0;transition:background .2s}
+.sw.on{background:var(--accent2);border-color:var(--accent2)}
+.sw-dot{position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--muted);border-radius:50%;transition:all .2s}
+.sw.on .sw-dot{left:auto;right:2px;background:#fff}
+.reveal-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 20px;text-align:center;margin:14px 0}
+.role-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.role-hidden{background:rgba(107,107,138,.15);color:var(--muted);border:1px solid rgba(107,107,138,.3)}
+.role-citizen{background:rgba(16,185,129,.15);color:var(--citizen);border:1px solid rgba(16,185,129,.3)}
+.role-uc{background:rgba(230,63,106,.15);color:var(--uc);border:1px solid rgba(230,63,106,.3)}
+.role-mw{background:rgba(245,158,11,.15);color:var(--mw);border:1px solid rgba(245,158,11,.3)}
+.secret-word{font-weight:900;font-size:40px;letter-spacing:2px;margin:8px 0 4px;line-height:1.15}
+.w-purple{color:var(--accent2)}.w-mw{color:var(--mw)}
+.mask{background:#000;border-radius:20px;padding:36px 20px;text-align:center;margin:16px 0}
+.elim-option{background:var(--surface2);border:2px solid var(--border);border-radius:13px;padding:15px 16px;margin-bottom:9px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:16px;font-weight:600}
+.elim-option.sel{border-color:var(--accent);background:rgba(230,63,106,.12)}
+.elim-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px}
+.elim-option.sel .elim-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.round-badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 11px;font-size:12px;color:var(--muted);margin-bottom:12px}
+.alive-chips{display:flex;flex-wrap:wrap;gap:6px}
+.alive-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:13px;font-weight:500}
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:11px;margin-bottom:7px;background:var(--surface2);border:1px solid var(--border)}
+.score-row.leader{border-color:var(--mw);background:rgba(245,158,11,.08)}
+.score-name{font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.score-pts{font-weight:900;font-size:20px;color:var(--citizen)}
+.score-delta{font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px}
+.dc{background:rgba(16,185,129,.2);color:var(--citizen)}
+.du{background:rgba(230,63,106,.2);color:var(--uc)}
+.dm{background:rgba(245,158,11,.2);color:var(--mw)}
+.dn{background:var(--surface);color:var(--muted)}
+.reveal-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:10px;padding:10px 13px;margin-bottom:7px}
+.reveal-role{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.scrollable{overflow-y:auto}
+.pair-item{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--surface2);border:2px solid var(--border);border-radius:11px;margin-bottom:7px;cursor:pointer}
+.pair-item.sel{border-color:var(--accent2)}
+.pair-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:#fff}
+.pair-item.sel .pair-check{background:var(--accent2);border-color:var(--accent2)}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:7px;margin:14px 0 20px}
+.podium-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.podium-block{border-radius:10px 10px 0 0;width:86px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff}
+.podium-name{font-size:12px;font-weight:700;text-align:center;max-width:86px;word-break:break-word}
+.podium-pts{font-size:11px;color:var(--muted)}
+.p1{background:linear-gradient(135deg,#f59e0b,#d97706);height:108px}
+.p2{background:linear-gradient(135deg,#94a3b8,#64748b);height:78px}
+.p3{background:linear-gradient(135deg,#c2956c,#a16207);height:58px}
+.tab-bar{display:flex;gap:0;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:3px}
+.tab-btn{flex:1;padding:9px;border:none;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted)}
+.tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+</style>
+</head>
 <body>
-<!-- v2.0 - Version Web mobile initiale
-     Interface tactile, vote interactif, podium, scores -->
+<div class="app">
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:36px 0">
+    <div style="font-size:48px;margin-bottom:8px">&#128373;&#65039;</div>
+    <div class="logo">UNDERCOVER</div>
+    <div class="tagline">Le jeu de d&eacute;duction sociale</div>
+  </div>
+  <div class="card" style="font-size:13px;color:var(--muted);line-height:1.9">
+    &#127965;&#65039; <strong style="color:var(--citizen)">Citoyens</strong> &mdash; partagent le m&ecirc;me mot<br>
+    &#128373;&#65039; <strong style="color:var(--uc)">Undercover</strong> &mdash; a un mot similaire mais diff&eacute;rent<br>
+    &#128123; <strong style="color:var(--mw)">Mr. White</strong> &mdash; n&rsquo;a aucun mot, doit bluffer
+  </div>
+  <div class="card" style="font-size:12px;color:var(--muted)">
+    <div style="font-weight:700;color:var(--text);margin-bottom:7px">&#127942; Syst&egrave;me de points</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span style="background:rgba(16,185,129,.15);color:var(--citizen);padding:3px 9px;border-radius:20px;font-weight:600;font-size:11px">Citoyen +1</span>
+      <span style="background:rgba(230,63,106,.15);color:var(--uc);padding:3px 9px;border-radius:20px;font-weight:600;font-size:11px">Undercover +2</span>
+      <span style="background:rgba(245,158,11,.15);color:var(--mw);padding:3px 9px;border-radius:20px;font-weight:600;font-size:11px">Mr.White +3</span>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="btn-home-start">Nouvelle manche</button>
+  <button class="btn btn-secondary mt" id="btn-home-score" style="display:none">Classement &#127942;</button>
+  <button class="btn btn-danger mt" id="btn-home-reset" style="display:none">Remettre &agrave; z&eacute;ro</button>
+</div>
+
+<!-- SETUP -->
+<div class="screen" id="s-setup">
+  <div style="text-align:center;margin-bottom:18px;padding:16px 0 6px">
+    <div style="font-size:32px;margin-bottom:5px">&#127917;</div>
+    <div style="font-family:var(--font);font-weight:900;font-size:26px;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2),#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">POP CULTURE</div>
+    <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px">S&eacute;lectionne tes univers</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Joueurs (3 minimum)</div>
+    <div style="display:flex;gap:7px">
+      <input type="text" id="playerInput" placeholder="Pr&eacute;nom..." maxlength="20">
+      <button id="btn-add-player" style="background:var(--accent2);border:none;color:#fff;border-radius:10px;padding:0 16px;font-size:22px;cursor:pointer;flex-shrink:0">+</button>
+    </div>
+    <div id="playerList" style="margin-top:9px"></div>
+    <div id="playerCount" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Univers</div>
+    <div id="universeGrid"></div>
+    <div id="universeWarn" style="font-size:11px;color:var(--mw);margin-top:6px;text-align:center;display:none">&#9888;&#65039; S&eacute;lectionne au moins 2 univers</div>
+  </div>
+
+  <div class="card">
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:600">&#128256; Probabilit&eacute; cross-over</div>
+        <div id="crossoverPctLabel" style="font-weight:900;font-size:16px;color:var(--accent2)">50%</div>
+      </div>
+      <input type="range" id="crossoverSlider" min="0" max="100" value="50" step="5" style="width:100%;accent-color:var(--accent2);cursor:pointer">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px">
+        <span>0%</span><span>100%</span>
+      </div>
+    </div>
+    <button class="btn btn-secondary" id="btn-pairs" style="font-size:13px;padding:10px">&#128065;&#65039; Voir &amp; choisir les paires disponibles</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Undercovers</div>
+    <div class="counter">
+      <button class="counter-btn" id="btn-uc-minus">&#8722;</button>
+      <div class="counter-val" id="ucCount">1</div>
+      <button class="counter-btn" id="btn-uc-plus">+</button>
+      <span style="font-size:13px;color:var(--muted)">undercover(s)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="toggle-row" style="margin-bottom:12px">
+      <div><div style="font-weight:600">&#128123; Mr. White</div><div style="font-size:11px;color:var(--muted)">Un joueur sans mot</div></div>
+      <label class="toggle"><input type="checkbox" id="mrwhiteToggle"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div style="font-weight:600">&#127917; R&ocirc;les cach&eacute;s</div><div style="font-size:11px;color:var(--muted)">Personne ne sait son r&ocirc;le</div></div>
+      <label class="toggle"><input type="checkbox" id="hiddenRoleToggle"><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+  <button class="btn btn-primary" id="btn-start">Lancer la manche &#128640;</button>
+  <button class="btn btn-secondary mt" id="btn-setup-back">Retour</button>
+</div>
+
+<!-- PAIRS -->
+<div class="screen" id="s-pairs">
+  <h2>&#127921; Paires disponibles</h2>
+  <p class="mb">Seules les paires des univers actifs sont affich&eacute;es.</p>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-normal" data-tab="normal">&#127921; Paires normales</button>
+    <button class="tab-btn" id="tab-cross" data-tab="cross">&#128256; Cross-overs</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <button id="btn-select-all" style="background:rgba(124,58,237,.2);border:1px solid var(--accent2);color:var(--accent2);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">Tout s&eacute;lectionner</button>
+    <button id="btn-deselect-all" style="background:rgba(230,63,106,.1);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">Tout d&eacute;s&eacute;lectionner</button>
+    <span id="pairsCount" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+  <div id="pairsList" class="scrollable" style="flex:1"></div>
+  <button class="btn btn-primary mt" id="btn-pairs-back">&#8592; Retour &agrave; la config</button>
+</div>
+
+<!-- REVEAL -->
+<div class="screen" id="s-reveal">
+  <div id="revealContent"></div>
+</div>
+
+<!-- ROUND -->
+<div class="screen" id="s-round">
+  <div class="round-badge" id="roundBadge">Tour 1</div>
+  <h2>&#128483;&#65039; Discussion orale</h2>
+  <p class="mb">Chaque joueur donne &agrave; voix haute un mot ou expression sur son mot secret.</p>
+  <div class="card">
+    <div class="card-title">Joueurs en jeu</div>
+    <div class="alive-chips" id="aliveChips"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#127922; Ordre de passage ce tour</div>
+    <div id="passOrder"></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn btn-primary" id="btn-go-vote">Passer au vote &#8594;</button>
+</div>
+
+<!-- VOTE -->
+<div class="screen" id="s-vote">
+  <div class="round-badge" id="voteBadge">Vote</div>
+  <h2>&#128499;&#65039; Qui est &eacute;limin&eacute; ?</h2>
+  <p class="mb">Votez &agrave; voix haute, puis s&eacute;lectionnez le joueur &eacute;limin&eacute; :</p>
+  <div id="elimOptions"></div>
+  <button class="btn btn-danger" id="confirmElimBtn" style="display:none;margin-top:4px">Confirmer l&rsquo;&eacute;limination &#10003;</button>
+  <button class="btn btn-warn mt" id="btn-no-elim">&#9878;&#65039; &Eacute;galit&eacute; &mdash; personne n&rsquo;est &eacute;limin&eacute;</button>
+  <button class="btn btn-secondary mt" id="btn-vote-back">&#8592; Retour</button>
+</div>
+
+<!-- MR WHITE -->
+<div class="screen" id="s-mrwhite">
+  <div style="text-align:center;padding:18px 0">
+    <div style="font-size:56px">&#128123;</div>
+    <h2 style="margin-top:7px">MR. WHITE</h2>
+    <p>Tu as &eacute;t&eacute; &eacute;limin&eacute; mais tu as une chance de gagner !</p>
+    <p style="margin-top:10px">Devine le <strong style="color:var(--citizen)">mot des citoyens</strong> :</p>
+  </div>
+  <input type="text" id="mwGuessInput" placeholder="Ton mot..." style="margin:16px 0;font-size:20px;text-align:center">
+  <button class="btn btn-primary" id="btn-mw-guess">Valider &#10003;</button>
+</div>
+
+<!-- END ROUND -->
+<div class="screen" id="s-endround">
+  <div id="endRoundContent" class="scrollable"></div>
+</div>
+
+<!-- SCOREBOARD -->
+<div class="screen" id="s-scoreboard">
+  <div id="scoreboardContent" class="scrollable"></div>
+</div>
+
+</div><!-- .app -->
+
 <script>
-var VERSION = "2.0";
+/* ================================================
+   DONNEES
+================================================ */
+var UNIVERSES = {
+  "Naruto":{"emoji":"&#x1F365;","group":"manga","pairs":[["Rasengan","Chidori"],["Sharingan","Byakugan"],["Kakashi","Guy"],["Chunin","Jonin"],["Madara","Obito"]]},
+  "One Piece":{"emoji":"&#x2620;&#xFE0F;","group":"manga","pairs":[["Haki","Fruit du D\u00e9mon"],["Marine","Corsaire"],["Shanks","Barbe Blanche"],["Ussop","Sniper King"],["Garp","Smoker"],["Joy Boy","Roger"],["Barbe Noire","Xebec"],["Barbe Blanche","Garp"],["Arlong","Jinbei"],["Koby","Garp"]]},
+  "Dragon Ball":{"emoji":"&#x1F409;","group":"manga","pairs":[["Super Saiyan","Ultra Instinct"],["Kameha","Galick Gun"],["Capsule Corp","Arm\u00e9e du Ruban Rouge"],["Boo","Cell"],["Krilin","Tien Shinhan"],["Broly","Jiren"]]},
+  "Attaque des Titans":{"emoji":"&#x2694;&#xFE0F;","group":"manga","pairs":[["Titan Colossal","Titan Cuirass\u00e9"],["Mur Maria","Mur Rose"],["Levi","Erwin"],["Yeagerists","Corps d'Exploration"],["Shiganshina","Liberio"],["Titan Assaillant","Titan F\u00e9minin"]]},
+  "Demon Slayer":{"emoji":"&#x1F5E1;&#xFE0F;","group":"manga","pairs":[["Tanjiro","Nezuko"],["Respiration de l'Eau","Respiration du Tonnerre"],["Pilier de l'Eau","Pilier du Vent"],["Kibutsuji","Akaza"],["Mont Natagumo","Yoshiwara"],["Hinokami Kagura","Respiration de la B\u00eate"]]},
+  "Jujutsu Kaisen":{"emoji":"&#x1F441;&#xFE0F;","group":"manga","pairs":[["Gojo","Geto"],["Yuji","Megumi"],["Sukuna","Mahito"],["Jujutsu Tech","Kyoto Tech"],["Mal\u00e9diction","Fl\u00e9au"],["Domaine d'Extension","Technique Occulte"]]},
+  "Chainsaw Man":{"emoji":"&#x1FAA8;","group":"manga","pairs":[["Denji","Makima"],["Aki","Power"],["D\u00e9mon Tron\u00e7onneuse","D\u00e9mon Chauve-Souris"],["Division 4","Division Sp\u00e9ciale"],["Contrat","Pacte"],["D\u00e9mon du Gun","D\u00e9mon du Couteau"]]},
+  "Death Note":{"emoji":"&#x1F4D3;","group":"manga","pairs":[["Light Yagami","L"],["Ryuk","Rem"],["Near","Mello"],["Mort naturelle","Mort accidentelle"],["Kira","L Lawliet"],["Shinigami","D\u00e9tective"]]},
+  "My Hero Academia":{"emoji":"&#x1F4AA;","group":"manga","pairs":[["Deku","Bakugo"],["One For All","All For One"],["U.A.","Shiketsu"],["All Might","Endeavor"],["Quirk","Licence de h\u00e9ros"],["Ligue des Vilains","Commission de S\u00e9curit\u00e9"]]},
+  "One Punch Man":{"emoji":"&#x1F44A;","group":"manga","pairs":[["Saitama","Genos"],["H\u00e9ros de classe S","H\u00e9ros de classe A"],["Association des H\u00e9ros","Monster Association"],["Bang","King"],["Garou","Speed-o'-Sound Sonic"]]},
+  "Spy x Family":{"emoji":"&#x1F338;","group":"manga","pairs":[["Loid","Yor"],["Eden Academy","WISE"],["Desmond","Donovan"],["Op\u00e9ration Strix","S\u00e9curit\u00e9 de l'\u00c9tat"],["Twilight","Thorn Princess"]]},
+  "Hunter x Hunter":{"emoji":"&#x1F3AF;","group":"manga","pairs":[["Gon","Killua"],["Nen","Gyo"],["Zoldyck","Freecss"],["Hisoka","Illumi"],["Kurta","Phantom Troupe"],["Emission","Transformation"]]},
+  "Tokyo Ghoul":{"emoji":"&#x1F479;","group":"manga","pairs":[["Kaneki","Touka"],["CCG","Anteiku"],["Quinque","Kagune"],["Aogiri","Ghoul"],["Ghoul masqu\u00e9","Ghoul pur"],["Rc cells","Investigateur"]]},
+  "Fullmetal Alchemist":{"emoji":"&#x2697;&#xFE0F;","group":"manga","pairs":[["Edward","Alphonse"],["Philosophe","Pierre de l'\u00c2me"],["Roy Mustang","Riza Hawkeye"],["Homunculus","Chim\u00e8re"],["Amestris","Xing"],["Transmutation","Equivalent Exchange"]]},
+  "Frieren":{"emoji":"&#x1F9DD;","group":"manga","pairs":[["Frieren","Fern"],["Himmel","Heiter"],["Stille","Aura"],["Denken","Wirbel"],["Elfes","Humains"],["Premier Classe","Deuxi\u00e8me Classe"]]},
+  "Apothicaire":{"emoji":"&#x1F9EA;","group":"manga","pairs":[["Maomao","Jinshi"],["Cour Int\u00e9rieure","Cour Ext\u00e9rieure"],["Poison","Rem\u00e8de"],["Verdigris","Fuyou"],["Lakan","Gaoshun"],["Concubine","Eunuque"]]},
+  "Asterix":{"emoji":"&#x1F94A;","group":"bd","pairs":[["Asterix","Obelix"],["Potion magique","Menhir"],["Village gaulois","Camp romain"],["Idefix","Panoramix"],["Abraracourcix","Assurancetourix"],["Gaulois","L\u00e9gionnaire"]]},
+  "Tintin":{"emoji":"&#x1F680;","group":"bd","pairs":[["Dupont","Dupond"]]},
+  "Lucky Luke":{"emoji":"&#x1F920;","group":"bd","pairs":[["Dalton","Rantanplan"],["Far West","Saloon"],["Sherif","Hors-la-loi"],["William Dalton","Jack Dalton"],["Lasso","Revolver"]]},
+  "Les Schtroumpfs":{"emoji":"&#x1F535;","group":"bd","pairs":[["Champignon","Potion"],["Schtroumpf Grognon","Schtroumpf Costaud"]]},
+  "Marvel":{"emoji":"&#x2B50;","group":"marvel","pairs":[["Avengers","X-Men"],["S.H.I.E.L.D.","Hydra"],["Vibranium","Adamantium"]]},
+  "DC Universe":{"emoji":"&#x1F987;","group":"marvel","pairs":[["Batman","Superman"],["Joker","Lex Luthor"],["Justice League","Suicide Squad"],["Gotham","Metropolis"],["Kryptonite","Lasso de V\u00e9rit\u00e9"]]},
+  "Marvel vs DC":{"emoji":"&#x26A1;","group":"marvel","pairs":[["Iron Man","Batman"],["Black Widow","Catwoman"],["Avengers","Justice League"]]},
+  "Star Wars":{"emoji":"&#x2694;&#xFE0F;","group":"cinema","pairs":[["Luke Skywalker","Anakin Skywalker"],["Jedi","Sith"],["Sabre Laser","Force"],["Yoda","Palpatine"],["Millennium Falcon","\u00c9toile de la Mort"],["Han Solo","Chewbacca"]]},
+  "Harry Potter":{"emoji":"&#x1F9D9;","group":"cinema","pairs":[["Harry","Hermione"],["Gryffondor","Serpentard"],["Poudlard","Pr\u00e9-au-Lard"],["Voldemort","Dumbledore"],["Patronus","Horcruxe"],["Sortil\u00e8ge","Potion"]]},
+  "Le Seigneur des Anneaux":{"emoji":"&#x1F48D;","group":"cinema","pairs":[["Aragorn","Legolas"]]},
+  "Jurassic Park":{"emoji":"&#x1F995;","group":"cinema","pairs":[["T-Rex","V\u00e9lociraptor"],["Hammond","Malcolm"],["Clone","Fossile"],["Parc","R\u00e9serve"],["Herbivore","Carnivore"]]},
+  "Pirates des Caraibes":{"emoji":"&#x1F3F4;&#x200D;&#x2620;&#xFE0F;","group":"cinema","pairs":[["Jack Sparrow","Barbossa"],["La Perle Noire","Le Hollandais Volant"],["Davy Jones","Barbe Noire"]]},
+  "Indiana Jones":{"emoji":"&#x1F3A9;","group":"cinema","pairs":[["Carte","Boussole"]]}
+};
+
+var GROUP_LABELS = {
+  manga:  {label:"Manga & Anime",    color:"#7c3aed"},
+  bd:     {label:"BD Franco-belge",  color:"#0891b2"},
+  marvel: {label:"Marvel / DC",      color:"#dc2626"},
+  cinema: {label:"Cinema",           color:"#d97706"}
+};
+
+var CROSSOVER_PAIRS = [
+  {tag:"perso",a:"Naruto",b:"One Piece",pair:["Naruto Uzumaki","Monkey D. Luffy"]},
+  {tag:"perso",a:"Naruto",b:"Dragon Ball",pair:["Naruto Uzumaki","Son Goku"]},
+  {tag:"perso",a:"Naruto",b:"My Hero Academia",pair:["Naruto Uzumaki","Izuku Midoriya"]},
+  {tag:"perso",a:"Naruto",b:"Hunter x Hunter",pair:["Sasuke Uchiha","Killua Zoldyck"]},
+  {tag:"perso",a:"Naruto",b:"Demon Slayer",pair:["Kakashi Hatake","Yoriichi Tsugikuni"]},
+  {tag:"perso",a:"Naruto",b:"Jujutsu Kaisen",pair:["Naruto Uzumaki","Yuji Itadori"]},
+  {tag:"perso",a:"One Piece",b:"Dragon Ball",pair:["Monkey D. Luffy","Son Goku"]},
+  {tag:"perso",a:"One Piece",b:"Attaque des Titans",pair:["Shanks","Erwin Smith"]},
+  {tag:"perso",a:"One Piece",b:"Frieren",pair:["Brook","Frieren"]},
+  {tag:"perso",a:"Dragon Ball",b:"One Punch Man",pair:["Son Goku","Saitama"]},
+  {tag:"perso",a:"Dragon Ball",b:"My Hero Academia",pair:["Vegeta","Bakugo"]},
+  {tag:"perso",a:"Dragon Ball",b:"Naruto",pair:["Vegeta","Sasuke"]},
+  {tag:"perso",a:"Attaque des Titans",b:"Demon Slayer",pair:["Levi Ackerman","Tengen Uzui"]},
+  {tag:"perso",a:"Attaque des Titans",b:"Jujutsu Kaisen",pair:["Eren Yeager","Yuji Itadori"]},
+  {tag:"perso",a:"Attaque des Titans",b:"Chainsaw Man",pair:["Reiner Braun","Denji"]},
+  {tag:"perso",a:"Demon Slayer",b:"Jujutsu Kaisen",pair:["Tanjiro Kamado","Yuji Itadori"]},
+  {tag:"perso",a:"Jujutsu Kaisen",b:"Chainsaw Man",pair:["Ryomen Sukuna","Pochita"]},
+  {tag:"perso",a:"Jujutsu Kaisen",b:"Demon Slayer",pair:["Satoru Gojo","Yoriichi Tsugikuni"]},
+  {tag:"perso",a:"Death Note",b:"Chainsaw Man",pair:["Light Yagami","Makima"]},
+  {tag:"perso",a:"Death Note",b:"Jujutsu Kaisen",pair:["L Lawliet","Satoru Gojo"]},
+  {tag:"perso",a:"My Hero Academia",b:"One Punch Man",pair:["All Might","Bang"]},
+  {tag:"perso",a:"My Hero Academia",b:"One Punch Man",pair:["Endeavor","Tatsumaki"]},
+  {tag:"perso",a:"My Hero Academia",b:"Hunter x Hunter",pair:["Izuku Midoriya","Gon Freecss"]},
+  {tag:"perso",a:"Hunter x Hunter",b:"Fullmetal Alchemist",pair:["Hisoka Morow","Solf J. Kimblee"]},
+  {tag:"perso",a:"Tokyo Ghoul",b:"Chainsaw Man",pair:["Ken Kaneki","Denji"]},
+  {tag:"perso",a:"Tokyo Ghoul",b:"Jujutsu Kaisen",pair:["Ken Kaneki","Yuji Itadori"]},
+  {tag:"perso",a:"Spy x Family",b:"Apothicaire",pair:["Anya Forger","Maomao"]},
+  {tag:"perso",a:"Dragon Ball",b:"Marvel",pair:["Vegeta","Iron Man"]},
+  {tag:"perso",a:"One Punch Man",b:"DC Universe",pair:["Saitama","Superman"]},
+  {tag:"perso",a:"My Hero Academia",b:"Marvel",pair:["Endeavor","Iron Man"]},
+  {tag:"perso",a:"My Hero Academia",b:"Marvel",pair:["All Might","Captain America"]},
+  {tag:"perso",a:"Death Note",b:"DC Universe",pair:["Light Yagami","Lex Luthor"]},
+  {tag:"perso",a:"Attaque des Titans",b:"Marvel",pair:["Levi Ackerman","Black Widow"]},
+  {tag:"perso",a:"Naruto",b:"Marvel",pair:["Sasuke Uchiha","Loki"]},
+  {tag:"perso",a:"Tokyo Ghoul",b:"DC Universe",pair:["Ken Kaneki","Batman"]},
+  {tag:"perso",a:"Attaque des Titans",b:"Star Wars",pair:["Reiner Braun","Darth Vader"]},
+  {tag:"perso",a:"Harry Potter",b:"Fullmetal Alchemist",pair:["Hermione Granger","Edward Elric"]},
+  {tag:"perso",a:"Harry Potter",b:"Frieren",pair:["Albus Dumbledore","Frieren"]},
+  {tag:"perso",a:"Le Seigneur des Anneaux",b:"Frieren",pair:["Legolas","Frieren"]},
+  {tag:"perso",a:"Star Wars",b:"One Piece",pair:["Dark Vador","Barbe Noire"]},
+  {tag:"perso",a:"Asterix",b:"One Punch Man",pair:["Asterix (potion)","Saitama"]},
+  {tag:"perso",a:"Tintin",b:"Spy x Family",pair:["Tintin","Loid Forger"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Iron Man","Batman"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Black Widow","Catwoman"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Loki","Joker"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Captain America","Batman"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Black Panther","Batman"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Deadpool","Harley Quinn"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Doctor Strange","Doctor Fate"]},
+  {tag:"perso",a:"Marvel",b:"DC Universe",pair:["Thor","Superman"]},
+  {tag:"perso",a:"Dragon Ball",b:"Naruto",pair:["Krilin","Saitama"]},
+  {tag:"perso",a:"One Punch Man",b:"One Piece",pair:["Saitama","Sengoku"]},
+  {tag:"perso",a:"Harry Potter",b:"Le Seigneur des Anneaux",pair:["Dumbledore","Gandalf"]},
+  {tag:"perso",a:"Star Wars",b:"Harry Potter",pair:["Yoda","Dumbledore"]},
+  {tag:"perso",a:"Star Wars",b:"Le Seigneur des Anneaux",pair:["Dark Vador","Sauron"]},
+  {tag:"perso",a:"Le Seigneur des Anneaux",b:"Harry Potter",pair:["Gollum","Dobby"]},
+  {tag:"perso",a:"Tintin",b:"Les Schtroumpfs",pair:["Tintin","Spirou"]},
+  {tag:"perso",a:"Asterix",b:"Tintin",pair:["Panoramix","Professeur Tournesol"]},
+  {tag:"perso",a:"Asterix",b:"Tintin",pair:["Milou","Idefix"]},
+  {tag:"perso",a:"Pirates des Caraibes",b:"Indiana Jones",pair:["Jack Sparrow","Indiana Jones"]},
+  {tag:"perso",a:"Pirates des Caraibes",b:"One Piece",pair:["Jack Sparrow","Monkey D. Luffy"]},
+  {tag:"perso",a:"Pirates des Caraibes",b:"Star Wars",pair:["Jack Sparrow","Han Solo"]},
+  {tag:"perso",a:"Pirates des Caraibes",b:"One Piece",pair:["Davy Jones","Barbe Noire"]},
+  {tag:"perso",a:"Indiana Jones",b:"Tintin",pair:["Indiana Jones","Tintin"]},
+  {tag:"tech",a:"Naruto",b:"Dragon Ball",pair:["Rasengan","Kamehameha"]},
+  {tag:"tech",a:"Naruto",b:"Dragon Ball",pair:["Chidori","Galick Gun"]},
+  {tag:"tech",a:"Naruto",b:"One Piece",pair:["Chakra","Haki"]},
+  {tag:"tech",a:"Naruto",b:"My Hero Academia",pair:["Mode Ermite","Full Cowling"]},
+  {tag:"tech",a:"Demon Slayer",b:"Naruto",pair:["Respiration du Soleil","Mode Ermite Naturel"]},
+  {tag:"tech",a:"Demon Slayer",b:"Hunter x Hunter",pair:["Respiration","Nen"]},
+  {tag:"tech",a:"Jujutsu Kaisen",b:"Hunter x Hunter",pair:["Domaine d'Extension","Zone de Nen"]},
+  {tag:"tech",a:"My Hero Academia",b:"Hunter x Hunter",pair:["Quirk","Nen"]},
+  {tag:"tech",a:"Fullmetal Alchemist",b:"Harry Potter",pair:["Alchimie","Magie"]},
+  {tag:"tech",a:"Fullmetal Alchemist",b:"Frieren",pair:["Transmutation","Magie Ancienne"]},
+  {tag:"tech",a:"Dragon Ball",b:"My Hero Academia",pair:["Super Saiyan","\u00c9veil du Quirk"]},
+  {tag:"tech",a:"Dragon Ball",b:"One Punch Man",pair:["Ultra Instinct","Mode H\u00e9ros"]},
+  {tag:"tech",a:"Star Wars",b:"Attaque des Titans",pair:["Sabre Laser","Lame ODM"]},
+  {tag:"tech",a:"Star Wars",b:"Harry Potter",pair:["La Force","Magie"]},
+  {tag:"tech",a:"Harry Potter",b:"Jujutsu Kaisen",pair:["Avada Kedavra","Mal\u00e9diction Sp\u00e9ciale"]},
+  {tag:"tech",a:"Marvel",b:"DC Universe",pair:["Eclair de Thor","Eclair de Flash"]},
+  {tag:"tech",a:"Marvel",b:"DC Universe",pair:["Armure d'Iron Man","Costume de Batman"]},
+  {tag:"tech",a:"Le Seigneur des Anneaux",b:"Harry Potter",pair:["Anneau Unique","Horcruxe"]},
+  {tag:"tech",a:"Harry Potter",b:"Le Seigneur des Anneaux",pair:["Patronus","Lumi\u00e8re d'Elendil"]},
+  {tag:"tech",a:"Le Seigneur des Anneaux",b:"Indiana Jones",pair:["Anneau Unique","Arche d'Alliance"]},
+  {tag:"tech",a:"Pirates des Caraibes",b:"One Piece",pair:["Boussole de Jack Sparrow","Boussole de Nami"]},
+  {tag:"tech",a:"Naruto",b:"Dragon Ball",pair:["Rasengan","Kamehameha"]},
+  {tag:"lieu",a:"Naruto",b:"Attaque des Titans",pair:["Konoha","Shiganshina"]},
+  {tag:"lieu",a:"Naruto",b:"My Hero Academia",pair:["Village Cache des Feuilles","Ville de Musutafu"]},
+  {tag:"lieu",a:"Jujutsu Kaisen",b:"My Hero Academia",pair:["Jujutsu Tech","U.A."]},
+  {tag:"lieu",a:"Jujutsu Kaisen",b:"Naruto",pair:["Jujutsu Tech","Academie Ninja de Konoha"]},
+  {tag:"lieu",a:"Harry Potter",b:"Fullmetal Alchemist",pair:["Poudlard","Academie Militaire"]},
+  {tag:"lieu",a:"Harry Potter",b:"My Hero Academia",pair:["Poudlard","U.A."]},
+  {tag:"lieu",a:"Star Wars",b:"One Piece",pair:["Etoile de la Mort","Enies Lobby"]},
+  {tag:"lieu",a:"Star Wars",b:"Attaque des Titans",pair:["Empire Galactique","Gouvernement de Marley"]},
+  {tag:"lieu",a:"Marvel",b:"DC Universe",pair:["Asgard","Olympe"]},
+  {tag:"lieu",a:"Marvel",b:"DC Universe",pair:["New York (Marvel)","Metropolis"]},
+  {tag:"lieu",a:"Asterix",b:"Attaque des Titans",pair:["Village gaulois","Paradis"]},
+  {tag:"lieu",a:"Le Seigneur des Anneaux",b:"Frieren",pair:["La Comte","Village de Frieren"]},
+  {tag:"lieu",a:"Le Seigneur des Anneaux",b:"Harry Potter",pair:["Mordor","Foret Interdite"]},
+  {tag:"lieu",a:"Le Seigneur des Anneaux",b:"Star Wars",pair:["Mordor","Etoile de la Mort"]},
+  {tag:"lieu",a:"Asterix",b:"Les Schtroumpfs",pair:["Village gaulois","Village des Schtroumpfs"]},
+  {tag:"concept",a:"Attaque des Titans",b:"One Piece",pair:["Liberte d'Eren","Liberte de Luffy"]},
+  {tag:"concept",a:"Death Note",b:"My Hero Academia",pair:["Justice de Kira","Justice de Deku"]},
+  {tag:"concept",a:"Chainsaw Man",b:"Jujutsu Kaisen",pair:["Demons","Fleaux Maudits"]},
+  {tag:"concept",a:"Chainsaw Man",b:"Tokyo Ghoul",pair:["Contrat Demon","Ghoul"]},
+  {tag:"concept",a:"Hunter x Hunter",b:"Frieren",pair:["Voyage du Chasseur","Voyage de la Mage"]},
+  {tag:"concept",a:"Marvel",b:"DC Universe",pair:["Multivers Marvel","Multivers DC"]},
+  {tag:"concept",a:"Le Seigneur des Anneaux",b:"Frieren",pair:["Quete de la Communaute","Quete de Frieren"]},
+  {tag:"concept",a:"Star Wars",b:"Naruto",pair:["Cote Obscur","Chemin de l'Obscurite"]},
+  {tag:"concept",a:"Star Wars",b:"Dragon Ball",pair:["La Force","Le Ki"]},
+  {tag:"concept",a:"Harry Potter",b:"Le Seigneur des Anneaux",pair:["Sang-de-bourbe","Semi-homme"]},
+  {tag:"concept",a:"Harry Potter",b:"Naruto",pair:["Sorcier de Moldu","Ninja sans Chakra"]},
+  {tag:"concept",a:"Asterix",b:"Marvel",pair:["Potion magique","Serum du Super-Soldat"]},
+  {tag:"concept",a:"Fullmetal Alchemist",b:"One Piece",pair:["Echange Equivalent","Fruit du Demon"]},
+  {tag:"concept",a:"Fullmetal Alchemist",b:"Jujutsu Kaisen",pair:["Homunculus","Malediction Speciale"]},
+  {tag:"concept",a:"Tokyo Ghoul",b:"Attaque des Titans",pair:["Humain vs Ghoul","Humain vs Titan"]},
+  {tag:"concept",a:"Death Note",b:"Spy x Family",pair:["Infiltration de Kira","Mission Strix"]},
+  {tag:"concept",a:"Lucky Luke",b:"Star Wars",pair:["Cow-boy solitaire","Jedi solitaire"]},
+  {tag:"concept",a:"Les Schtroumpfs",b:"Le Seigneur des Anneaux",pair:["Village Schtroumpf","La Comte"]},
+  {tag:"concept",a:"One Punch Man",b:"Dragon Ball",pair:["Entrainement de Saitama","Entrainement de Goku"]},
+  {tag:"concept",a:"Jurassic Park",b:"Attaque des Titans",pair:["Predateur incontrolable","Titan incontrolable"]},
+  {tag:"concept",a:"Spy x Family",b:"Naruto",pair:["Agent secret","Ninja"]},
+  {tag:"concept",a:"Apothicaire",b:"Harry Potter",pair:["Maomao (poisons)","Severus Rogue"]},
+  {tag:"concept",a:"Frieren",b:"Le Seigneur des Anneaux",pair:["Elfes immortels nostalgiques","Elrond immortel nostalgique"]},
+  {tag:"concept",a:"Star Wars",b:"Harry Potter",pair:["Cote Obscur","Magie Noire"]},
+  {tag:"concept",a:"Le Seigneur des Anneaux",b:"Harry Potter",pair:["Dragons de Smaug","Dragons de Norbert"]},
+  {tag:"concept",a:"Pirates des Caraibes",b:"One Piece",pair:["Malediction du Hollandais Volant","Fruit du Demon"]},
+  {tag:"concept",a:"Indiana Jones",b:"Death Note",pair:["Artefact maudit","Death Note"]}
+];
+
+var PTS = {citizen:1, undercover:2, mrwhite:3};
+
+/* ================================================
+   ETAT
+================================================ */
+var G = {
+  players:[], nbUC:1, mrwhite:false, hiddenRole:false,
+  selectedUniverses:{},
+  selectedGroups:{},
+  crossoverPct:50,
+  selectedCrossovers:{},
+  selectedNormalPairs:null,
+  game:{}, citizenWord:'', ucWord:'', currentCat:'', isCrossover:false,
+  round:1, revealIndex:0,
+  scores:{}, mancheNum:0, lastDeltas:{}
+};
+
+var selectedElim = null;
+var currentTab = 'normal';
+var pairDataCache = [];
+var coDataCache = [];
+
+// Init crossovers selectionnes (tous)
+(function(){
+  for(var i=0;i<CROSSOVER_PAIRS.length;i++) G.selectedCrossovers[i]=true;
+})();
+
+/* ================================================
+   NAVIGATION
+================================================ */
+function goTo(id){
+  var screens = document.querySelectorAll('.screen');
+  for(var i=0;i<screens.length;i++) screens[i].classList.remove('active');
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='s-pairs') renderPairsScreen();
+}
+
+/* ================================================
+   UTILS
+================================================ */
+function sel(id){ return document.getElementById(id); }
+function setHTML(id,html){ sel(id).innerHTML=html; }
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function objKeys(obj){
+  var k=[];
+  for(var p in obj) if(obj.hasOwnProperty(p)) k.push(p);
+  return k;
+}
+function uniKeys(){
+  return objKeys(UNIVERSES);
+}
+
+/* ================================================
+   GRILLE UNIVERS
+================================================ */
+function initUniverseGrid(){
+  var groups=['manga','bd','marvel','cinema'];
+  var html='';
+  for(var gi=0;gi<groups.length;gi++){
+    var grp=groups[gi];
+    var g=GROUP_LABELS[grp];
+    var grpOn=!!G.selectedGroups[grp];
+    var bc=grpOn?'var(--accent2)':'var(--border)';
+    var tc=grpOn?g.color:'var(--muted)';
+    var swBg=grpOn?'var(--accent2)':'var(--surface)';
+    var dotPos=grpOn?'right:2px':'left:2px';
+    var dotBg=grpOn?'#fff':'var(--muted)';
+    var dispGrid=grpOn?'grid':'none';
+    html+='<div style="margin-bottom:10px">';
+    html+='<div class="grp-bar'+(grpOn?' on':'')+'" data-grp="'+grp+'"';
+    html+=' style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;';
+    html+='background:var(--surface2);border:2px solid '+bc+';border-radius:12px;cursor:pointer">';
+    html+='<div style="font-size:13px;font-weight:700;color:'+tc+'">'+g.label+'</div>';
+    html+='<div class="sw'+(grpOn?' on':'')+'" style="width:44px;height:24px;background:'+swBg+';border:2px solid '+bc+';border-radius:24px;position:relative;flex-shrink:0">';
+    html+='<div class="sw-dot" style="position:absolute;top:2px;'+dotPos+';width:16px;height:16px;background:'+dotBg+';border-radius:50%"></div>';
+    html+='</div></div>';
+    html+='<div id="grp-'+grp+'" style="display:'+dispGrid+';grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px">';
+    var entries=[];
+    var uk=uniKeys();
+    for(var ui=0;ui<uk.length;ui++){
+      if(UNIVERSES[uk[ui]].group===grp) entries.push(uk[ui]);
+    }
+    for(var ei=0;ei<entries.length;ei++){
+      var name=entries[ei];
+      var data=UNIVERSES[name];
+      var isSel=!!G.selectedUniverses[name];
+      html+='<button class="uni-btn'+(isSel?' sel':'')+'" data-grp="'+grp+'" data-idx="'+ei+'">';
+      html+='<span class="uni-emoji">'+data.emoji+'</span>';
+      html+='<span class="uni-name">'+name+'</span>';
+      html+='</button>';
+    }
+    html+='</div></div>';
+  }
+  setHTML('universeGrid',html);
+  attachUniverseListeners();
+}
+
+function attachUniverseListeners(){
+  var bars=document.querySelectorAll('.grp-bar');
+  for(var i=0;i<bars.length;i++){
+    (function(el){
+      el.addEventListener('click',function(){ toggleGroup(el.getAttribute('data-grp')); });
+    })(bars[i]);
+  }
+  var btns=document.querySelectorAll('#universeGrid .uni-btn');
+  for(var i=0;i<btns.length;i++){
+    (function(el){
+      el.addEventListener('click',function(e){
+        e.stopPropagation();
+        var grp=el.getAttribute('data-grp');
+        var idx=parseInt(el.getAttribute('data-idx'));
+        var uk=uniKeys();
+        var entries=[];
+        for(var j=0;j<uk.length;j++) if(UNIVERSES[uk[j]].group===grp) entries.push(uk[j]);
+        if(entries[idx]) toggleUniverse(el,entries[idx]);
+      });
+    })(btns[i]);
+  }
+}
+
+function toggleGroup(grp){
+  var uk=uniKeys();
+  var entries=[];
+  for(var i=0;i<uk.length;i++) if(UNIVERSES[uk[i]].group===grp) entries.push(uk[i]);
+  if(G.selectedGroups[grp]){
+    var remain=0;
+    for(var k in G.selectedUniverses){
+      if(G.selectedUniverses[k]){
+        var inGroup=false;
+        for(var ei=0;ei<entries.length;ei++) if(entries[ei]===k){inGroup=true;break;}
+        if(!inGroup) remain++;
+      }
+    }
+    if(remain<2){sel('universeWarn').style.display='block';return;}
+    delete G.selectedGroups[grp];
+    for(var i=0;i<entries.length;i++) delete G.selectedUniverses[entries[i]];
+  } else {
+    G.selectedGroups[grp]=true;
+    for(var i=0;i<entries.length;i++) G.selectedUniverses[entries[i]]=true;
+    sel('universeWarn').style.display='none';
+  }
+  initUniverseGrid();
+}
+
+function toggleUniverse(el,name){
+  var count=0;
+  for(var k in G.selectedUniverses) if(G.selectedUniverses[k]) count++;
+  if(G.selectedUniverses[name]){
+    if(count<=2){sel('universeWarn').style.display='block';return;}
+    delete G.selectedUniverses[name];
+    el.classList.remove('sel');
+  } else {
+    G.selectedUniverses[name]=true;
+    el.classList.add('sel');
+    sel('universeWarn').style.display='none';
+  }
+}
+
+/* ================================================
+   JOUEURS
+================================================ */
+function renderPlayers(){
+  var html='';
+  for(var i=0;i<G.players.length;i++){
+    var p=G.players[i];
+    var pts=G.scores[p]||0;
+    html+='<div class="player-tag"><span>&#128100; '+p+' <span style="color:var(--muted);font-size:11px">'+pts+' pt'+(pts>1?'s':'')+'</span></span>';
+    html+='<button class="remove-btn" data-idx="'+i+'">&#215;</button></div>';
+  }
+  setHTML('playerList',html);
+  sel('playerCount').textContent=G.players.length+'/10 joueurs';
+  var max=Math.max(1,Math.floor(G.players.length/3));
+  if(G.nbUC>max){G.nbUC=max;sel('ucCount').textContent=max;}
+  var btns=document.querySelectorAll('#playerList .remove-btn');
+  for(var i=0;i<btns.length;i++){
+    (function(el){
+      el.addEventListener('click',function(){
+        var idx=parseInt(el.getAttribute('data-idx'));
+        var name=G.players[idx];
+        G.players.splice(idx,1);
+        delete G.scores[name];
+        renderPlayers();
+      });
+    })(btns[i]);
+  }
+}
+
+/* ================================================
+   PAIRS SCREEN
+================================================ */
+function renderPairsScreen(){
+  if(currentTab==='normal') renderNormalPairs();
+  else renderCrossoversList();
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  sel('tab-normal').classList.toggle('active',tab==='normal');
+  sel('tab-cross').classList.toggle('active',tab==='cross');
+  renderPairsScreen();
+}
+
+function buildNormalPairKey(uni,pi){ return uni+'::'+pi; }
+
+function renderNormalPairs(){
+  if(!G.selectedNormalPairs){
+    G.selectedNormalPairs={};
+    var uk=uniKeys();
+    for(var i=0;i<uk.length;i++){
+      if(!G.selectedUniverses[uk[i]]) continue;
+      var pairs=UNIVERSES[uk[i]].pairs;
+      for(var pi=0;pi<pairs.length;pi++) G.selectedNormalPairs[buildNormalPairKey(uk[i],pi)]=true;
+    }
+  }
+  var html='';
+  var total=0,active=0;
+  pairDataCache=[];
+  var uk=uniKeys();
+  for(var ui=0;ui<uk.length;ui++){
+    var name=uk[ui];
+    if(!G.selectedUniverses[name]) continue;
+    var data=UNIVERSES[name];
+    if(!data.pairs.length) continue;
+    html+='<div style="margin-bottom:18px">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">'+data.emoji+' '+name+'</div>';
+    for(var pi=0;pi<data.pairs.length;pi++){
+      var key=buildNormalPairKey(name,pi);
+      var isSel=!!G.selectedNormalPairs[key];
+      total++; if(isSel) active++;
+      var idx=pairDataCache.length;
+      pairDataCache.push({name:name,pi:pi});
+      var bc=isSel?'var(--accent2)':'var(--border)';
+      var bg=isSel?'var(--accent2)':'transparent';
+      var ck=isSel?'&#10003;':'';
+      html+='<div class="pair-item'+(isSel?' sel':'')+'" data-idx="'+idx+'">';
+      html+='<div style="flex:1;font-weight:700;font-size:14px">'+data.pairs[pi][0]+' <span style="color:var(--muted);font-weight:400">vs</span> '+data.pairs[pi][1]+'</div>';
+      html+='<div class="pair-check" style="background:'+bg+';border-color:'+bc+'">'+ck+'</div>';
+      html+='</div>';
+    }
+    html+='</div>';
+  }
+  if(!total) html='<div style="text-align:center;padding:40px 0;color:var(--muted)">&#128269; S&eacute;lectionne des univers pour voir les paires.</div>';
+  setHTML('pairsList',html);
+  sel('pairsCount').textContent=active+' / '+total+' s\u00e9lectionn\u00e9es';
+  var items=document.querySelectorAll('#pairsList .pair-item');
+  for(var i=0;i<items.length;i++){
+    (function(el){
+      el.addEventListener('click',function(){
+        var idx=parseInt(el.getAttribute('data-idx'));
+        var d=pairDataCache[idx];
+        var key=buildNormalPairKey(d.name,d.pi);
+        if(G.selectedNormalPairs[key]) delete G.selectedNormalPairs[key];
+        else G.selectedNormalPairs[key]=true;
+        renderNormalPairs();
+      });
+    })(items[i]);
+  }
+}
+
+function renderCrossoversList(){
+  var groups=['perso','tech','lieu','concept'];
+  var groupLabels={perso:'&#128100; Personnages',tech:'&#9889; Techniques',lieu:'&#128506;&#65039; Lieux',concept:'&#128161; Concepts'};
+  var html='';
+  var total=0,active=0;
+  coDataCache=[];
+  for(var gi=0;gi<groups.length;gi++){
+    var grp=groups[gi];
+    var items=[];
+    for(var ci=0;ci<CROSSOVER_PAIRS.length;ci++){
+      var cp=CROSSOVER_PAIRS[ci];
+      if(cp.tag!==grp) continue;
+      if(!G.selectedUniverses[cp.a]||!G.selectedUniverses[cp.b]) continue;
+      items.push({cp:cp,i:ci});
+    }
+    if(!items.length) continue;
+    html+='<div style="margin-bottom:18px">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">'+groupLabels[grp]+'</div>';
+    for(var ii=0;ii<items.length;ii++){
+      var cp=items[ii].cp; var ci=items[ii].i;
+      var isSel=!!G.selectedCrossovers[ci];
+      total++; if(isSel) active++;
+      var idx=coDataCache.length;
+      coDataCache.push(ci);
+      var bc=isSel?'var(--accent2)':'var(--border)';
+      var bg=isSel?'var(--accent2)':'transparent';
+      var ck=isSel?'&#10003;':'';
+      html+='<div class="pair-item'+(isSel?' sel':'')+'" data-idx="'+idx+'">';
+      html+='<div style="flex:1"><div style="font-weight:700;font-size:14px">'+cp.pair[0]+' <span style="color:var(--muted);font-weight:400">vs</span> '+cp.pair[1]+'</div>';
+      html+='<div style="font-size:11px;color:var(--muted);margin-top:2px">'+cp.a+' \u00d7 '+cp.b+'</div></div>';
+      html+='<div class="pair-check" style="background:'+bg+';border-color:'+bc+'">'+ck+'</div>';
+      html+='</div>';
+    }
+    html+='</div>';
+  }
+  if(!total) html='<div style="text-align:center;padding:40px 0;color:var(--muted)">&#128269; Aucun cross-over disponible.<br>S&eacute;lectionne au moins 2 univers communs.</div>';
+  setHTML('pairsList',html);
+  sel('pairsCount').textContent=active+' / '+total+' s\u00e9lectionn\u00e9s';
+  var items2=document.querySelectorAll('#pairsList .pair-item');
+  for(var i=0;i<items2.length;i++){
+    (function(el){
+      el.addEventListener('click',function(){
+        var idx=parseInt(el.getAttribute('data-idx'));
+        var ci=coDataCache[idx];
+        if(G.selectedCrossovers[ci]) delete G.selectedCrossovers[ci];
+        else G.selectedCrossovers[ci]=true;
+        renderCrossoversList();
+      });
+    })(items2[i]);
+  }
+}
+
+/* ================================================
+   BUILD PAIRS
+================================================ */
+function buildPopCulturePairs(){
+  var internal=[];
+  var uk=uniKeys();
+  for(var ui=0;ui<uk.length;ui++){
+    var name=uk[ui];
+    if(!G.selectedUniverses[name]) continue;
+    var pairs=UNIVERSES[name].pairs;
+    for(var pi=0;pi<pairs.length;pi++){
+      var key=buildNormalPairKey(name,pi);
+      if(!G.selectedNormalPairs||G.selectedNormalPairs[key])
+        internal.push({pair:pairs[pi],crossover:false});
+    }
+  }
+  var crossovers=[];
+  for(var ci=0;ci<CROSSOVER_PAIRS.length;ci++){
+    var cp=CROSSOVER_PAIRS[ci];
+    if(G.selectedCrossovers[ci]&&G.selectedUniverses[cp.a]&&G.selectedUniverses[cp.b])
+      crossovers.push({pair:cp.pair,crossover:true,tag:cp.tag});
+  }
+  var pct=G.crossoverPct/100;
+  if(crossovers.length>0&&internal.length>0){
+    return Math.random()<pct?crossovers:internal;
+  }
+  if(crossovers.length===0) return internal;
+  if(internal.length===0) return crossovers;
+  return internal;
+}
+
+/* ================================================
+   START GAME
+================================================ */
+function countSelected(){
+  var c=0;
+  for(var k in G.selectedUniverses) if(G.selectedUniverses[k]) c++;
+  return c;
+}
+
+function launchManche(){
+  var popPairs=buildPopCulturePairs();
+  if(popPairs.length===0){alert('Aucune paire disponible ! V\u00e9rifie les options.');goToOptions();return false;}
+  var entry=popPairs[Math.floor(Math.random()*popPairs.length)];
+  G.citizenWord=entry.pair[0];G.ucWord=entry.pair[1];
+  G.currentCat='Pop Culture';G.isCrossover=!!entry.crossover;
+  G.mancheNum++;
+  var shuffled=shuffle(G.players);
+  var roles=[];
+  for(var i=0;i<shuffled.length;i++) roles.push('citizen');
+  var ucIdx=[];
+  while(ucIdx.length<G.nbUC){
+    var r=Math.floor(Math.random()*shuffled.length);
+    var already=false;
+    for(var j=0;j<ucIdx.length;j++) if(ucIdx[j]===r){already=true;break;}
+    if(!already) ucIdx.push(r);
+  }
+  for(var i=0;i<ucIdx.length;i++) roles[ucIdx[i]]='undercover';
+  if(G.mrwhite){
+    var rem=[];
+    for(var i=0;i<roles.length;i++) if(roles[i]==='citizen') rem.push(i);
+    if(rem.length>0) roles[rem[Math.floor(Math.random()*rem.length)]]='mrwhite';
+  }
+  G.game={};
+  for(var i=0;i<shuffled.length;i++){
+    var name=shuffled[i];
+    var word=roles[i]==='citizen'?G.citizenWord:roles[i]==='undercover'?G.ucWord:null;
+    G.game[name]={role:roles[i],word:word,alive:true};
+  }
+  G.round=1;G.revealIndex=0;G.lastDeltas={};
+  return true;
+}
+
+function startGame(){
+  if(G.players.length<3){alert('Il faut au moins 3 joueurs !');return;}
+  if(countSelected()<2){alert('S\u00e9lectionne au moins 2 univers !');return;}
+  G.mrwhite=sel('mrwhiteToggle').checked;
+  G.hiddenRole=sel('hiddenRoleToggle').checked;
+  if(launchManche()) startReveal();
+}
+
+function nextManche(){
+  G.game={};G.citizenWord='';G.ucWord='';G.round=1;G.revealIndex=0;G.lastDeltas={};
+  if(G.players.length<3){alert('Il faut au moins 3 joueurs !');goToOptions();return;}
+  if(countSelected()<2){alert('S\u00e9lectionne au moins 2 univers dans les options !');goToOptions();return;}
+  if(launchManche()) startReveal();
+}
+
+function goToOptions(){
+  sel('mrwhiteToggle').checked=G.mrwhite;
+  sel('hiddenRoleToggle').checked=G.hiddenRole;
+  sel('crossoverSlider').value=G.crossoverPct;
+  sel('crossoverPctLabel').textContent=G.crossoverPct+'%';
+  initUniverseGrid();
+  renderPlayers();
+  sel('btn-home-score').style.display='block';
+  sel('btn-home-reset').style.display='block';
+  goTo('s-setup');
+}
+
+/* ================================================
+   REVEAL
+================================================ */
+function startReveal(){goTo('s-reveal');showRevealWaiting();}
+
+function showRevealWaiting(){
+  var names=objKeys(G.game);
+  if(G.revealIndex>=names.length){startRound();return;}
+  var name=names[G.revealIndex];
+  var html='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0">';
+  html+='<div style="font-size:56px;margin-bottom:16px">&#128100;</div>';
+  html+='<div style="font-size:13px;color:var(--muted);margin-bottom:8px">Joueur '+(G.revealIndex+1)+' / '+names.length+'</div>';
+  html+='<h2 style="text-align:center;font-size:32px;margin-bottom:6px">'+name+'</h2>';
+  html+='<p style="text-align:center;margin-bottom:32px">C\'est ton tour de lire ton mot.<br>Assure-toi que personne ne regarde !</p>';
+  html+='<button class="btn btn-primary" id="btn-show-word" style="max-width:320px">Afficher mon mot &#128065;&#65039;</button>';
+  html+='</div>';
+  setHTML('revealContent',html);
+  sel('btn-show-word').addEventListener('click',showRevealWord);
+}
+
+function showRevealWord(){
+  var names=objKeys(G.game);
+  var name=names[G.revealIndex];
+  var info=G.game[name];
+  var badgeHtml,wordHtml;
+  if(info.role==='mrwhite'){
+    badgeHtml='<div class="role-badge role-mw">&#128123; Mr. White</div>';
+    wordHtml='<div class="secret-word w-mw" style="font-size:26px;margin:12px 0">Pas de mot&hellip;<br><span style="font-size:12px;font-weight:400;color:var(--muted)">Fais semblant d\'en avoir un !</span></div>';
+  } else if(G.hiddenRole){
+    badgeHtml='<div class="role-badge role-hidden">&#127917; Voici ton mot</div>';
+    wordHtml='<div class="secret-word w-purple">'+info.word+'</div>';
+  } else if(info.role==='citizen'){
+    badgeHtml='<div class="role-badge role-citizen">&#127965;&#65039; Citoyen</div>';
+    wordHtml='<div class="secret-word w-purple">'+info.word+'</div>';
+  } else {
+    badgeHtml='<div class="role-badge role-uc">&#128373;&#65039; Undercover</div>';
+    wordHtml='<div class="secret-word w-purple">'+info.word+'</div>';
+  }
+  var html='<div style="text-align:center;color:var(--muted);font-size:12px;margin-bottom:5px">Joueur '+(G.revealIndex+1)+' / '+objKeys(G.game).length+'</div>';
+  html+='<h2 style="text-align:center">'+name+'</h2>';
+  html+='<div class="reveal-card">'+badgeHtml+wordHtml+'<p style="font-size:12px;margin-top:10px">M\u00e9morise bien ton mot !</p></div>';
+  html+='<button class="btn btn-primary" id="btn-hide-reveal">Cacher et passer &#128065;&#65039;</button>';
+  html+='<p style="text-align:center;font-size:11px;margin-top:10px">Montre ton mot en priv\u00e9, puis cache l\'\u00e9cran.</p>';
+  setHTML('revealContent',html);
+  sel('btn-hide-reveal').addEventListener('click',function(){G.revealIndex++;showRevealWaiting();});
+}
+
+/* ================================================
+   ROUND
+================================================ */
+function startRound(){
+  goTo('s-round');
+  sel('roundBadge').textContent='Manche '+G.mancheNum+' \u2014 Tour '+G.round;
+  var alive=[];
+  var gk=objKeys(G.game);
+  for(var i=0;i<gk.length;i++) if(G.game[gk[i]].alive) alive.push(gk[i]);
+  var chips='';
+  for(var i=0;i<alive.length;i++) chips+='<div class="alive-chip">&#128100; '+alive[i]+'</div>';
+  setHTML('aliveChips',chips);
+  var order=shuffle(alive);
+  var pass='';
+  for(var i=0;i<order.length;i++){
+    pass+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:7px">';
+    pass+='<div style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:900;font-size:13px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</div>';
+    pass+='<span style="font-weight:600">'+order[i]+'</span></div>';
+  }
+  setHTML('passOrder',pass);
+}
+
+/* ================================================
+   VOTE
+================================================ */
+function showVoteScreen(){
+  selectedElim=null;
+  sel('voteBadge').textContent='Manche '+G.mancheNum+' \u2014 Tour '+G.round+' \u2014 Vote';
+  var alive=[];
+  var gk=objKeys(G.game);
+  for(var i=0;i<gk.length;i++) if(G.game[gk[i]].alive) alive.push(gk[i]);
+  var html='';
+  for(var i=0;i<alive.length;i++){
+    html+='<div class="elim-option" data-idx="'+i+'">';
+    html+='<span>&#128100; '+alive[i]+'</span>';
+    html+='<div class="elim-check"></div>';
+    html+='</div>';
+  }
+  setHTML('elimOptions',html);
+  sel('confirmElimBtn').style.display='none';
+  goTo('s-vote');
+  var opts=document.querySelectorAll('.elim-option');
+  for(var i=0;i<opts.length;i++){
+    (function(el,n){
+      el.addEventListener('click',function(){
+        var all=document.querySelectorAll('.elim-option');
+        for(var j=0;j<all.length;j++){all[j].classList.remove('sel');all[j].querySelector('.elim-check').innerHTML='';}
+        el.classList.add('sel');
+        el.querySelector('.elim-check').innerHTML='&#10003;';
+        selectedElim=n;
+        sel('confirmElimBtn').style.display='block';
+      });
+    })(opts[i],alive[i]);
+  }
+}
+
+function confirmElim(){
+  if(!selectedElim) return;
+  G.game[selectedElim].alive=false;
+  if(G.game[selectedElim].role==='mrwhite'){goTo('s-mrwhite');return;}
+  checkWin();
+}
+
+/* ================================================
+   MR WHITE
+================================================ */
+function checkMWGuess(){
+  var guess=sel('mwGuessInput').value.trim().toLowerCase();
+  sel('mwGuessInput').value='';
+  if(guess===G.citizenWord.toLowerCase()) endManche('mrwhite');
+  else{alert('Rat\u00e9 ! Le mot \u00e9tait : '+G.citizenWord);checkWin();}
+}
+
+/* ================================================
+   WIN CHECK
+================================================ */
+function checkWin(){
+  var gk=objKeys(G.game);
+  var citizens=[],enemies=[];
+  for(var i=0;i<gk.length;i++){
+    var n=gk[i];
+    if(!G.game[n].alive) continue;
+    if(G.game[n].role==='citizen') citizens.push(n);
+    else enemies.push(n);
+  }
+  if(enemies.length===0){endManche('citizens');return;}
+  if(enemies.length>=citizens.length){endManche('enemies');return;}
+  G.round++;startRound();
+}
+
+/* ================================================
+   END MANCHE
+================================================ */
+function endManche(winner){
+  G.lastDeltas={};
+  var gk=objKeys(G.game);
+  for(var i=0;i<gk.length;i++){
+    var name=gk[i];
+    var info=G.game[name];
+    var pts=0;
+    if(winner==='citizens'&&info.role==='citizen'&&info.alive) pts=PTS.citizen;
+    if(winner==='enemies'&&info.role==='undercover'&&info.alive) pts=PTS.undercover;
+    if(winner==='mrwhite'&&info.role==='mrwhite') pts=PTS.mrwhite;
+    if(winner==='mrwhite'&&info.role==='undercover'&&info.alive) pts=PTS.undercover;
+    G.lastDeltas[name]=pts;
+    G.scores[name]=(G.scores[name]||0)+pts;
+  }
+  var icon,title,color;
+  if(winner==='citizens'){icon='&#127881;';title='Les Citoyens gagnent !';color='var(--citizen)';}
+  else if(winner==='mrwhite'){icon='&#128123;';title='Mr. White gagne !';color='var(--mw)';}
+  else{icon='&#128128;';title='Les Ennemis gagnent !';color='var(--uc)';}
+
+  var rolesReveal='';
+  for(var i=0;i<gk.length;i++){
+    var name=gk[i];var info=G.game[name];
+    var rLabel,rColor;
+    if(info.role==='citizen'){rLabel='Citoyen';rColor='var(--citizen)';}
+    else if(info.role==='undercover'){rLabel='Undercover';rColor='var(--uc)';}
+    else{rLabel='Mr. White';rColor='var(--mw)';}
+    var status=info.alive?'':' <span style="color:var(--muted);font-size:10px">[&eacute;limin&eacute;]</span>';
+    rolesReveal+='<div class="reveal-row"><span>'+name+status+'</span><span class="reveal-role" style="color:'+rColor+'">'+rLabel+'</span></div>';
+  }
+
+  var sorted=Object.keys(G.scores).sort(function(a,b){return G.scores[b]-G.scores[a];});
+  var ptRows='';
+  var medals=['&#128081;','&#129352;','&#129353;'];
+  for(var i=0;i<sorted.length;i++){
+    var name=sorted[i];
+    var delta=G.lastDeltas[name]||0;
+    var total=G.scores[name];
+    var role=G.game[name]?G.game[name].role:'citizen';
+    var dClass='dn',dStr='+0';
+    if(delta>0){
+      dStr='+'+delta;
+      if(role==='citizen') dClass='dc';
+      else if(role==='undercover') dClass='du';
+      else dClass='dm';
+    }
+    var medal=medals[i]||('#'+(i+1));
+    ptRows+='<div class="score-row'+(i===0?' leader':'')+'">';
+    ptRows+='<div class="score-name">'+medal+' '+name+' <span class="score-delta '+dClass+'">'+dStr+'</span></div>';
+    ptRows+='<div class="score-pts">'+total+' pt'+(total>1?'s':'')+'</div>';
+    ptRows+='</div>';
+  }
+  var cb=G.isCrossover?'<span style="display:inline-block;background:rgba(230,63,106,.12);color:var(--accent);border:1px solid rgba(230,63,106,.25);border-radius:6px;font-size:10px;font-weight:700;padding:2px 7px;margin-left:5px">Cross-over</span>':'';
+  var html='<div style="text-align:center;font-size:54px;margin:8px 0">'+icon+'</div>';
+  html+='<h2 style="text-align:center;color:'+color+';margin-bottom:3px">'+title+'</h2>';
+  html+='<p class="center mb">Manche '+G.mancheNum+'</p>';
+  html+='<div class="card"><div class="card-title">&#127942; Classement &mdash; Manche '+G.mancheNum+'</div>'+ptRows+'</div>';
+  html+='<button class="btn btn-primary" id="btn-next-manche">Manche suivante &#128260;</button>';
+  html+='<button class="btn btn-secondary mt" id="btn-options-end">&#9881;&#65039; Changer les options</button>';
+  html+='<button class="btn btn-secondary mt" id="btn-podium-end">Podium &#127885;</button>';
+  html+='<div class="card" style="margin-top:14px"><div class="card-title">Pop Culture '+cb+'</div>';
+  html+='<div class="reveal-row"><span>&#127965;&#65039; Mot citoyen</span><strong style="color:var(--citizen)">'+G.citizenWord+'</strong></div>';
+  html+='<div class="reveal-row"><span>&#128373;&#65039; Mot undercover</span><strong style="color:var(--uc)">'+G.ucWord+'</strong></div></div>';
+  html+='<div class="card"><div class="card-title">R&ocirc;les r&eacute;v&eacute;l&eacute;s</div>'+rolesReveal+'</div>';
+  setHTML('endRoundContent',html);
+  goTo('s-endround');
+  sel('btn-next-manche').addEventListener('click',nextManche);
+  sel('btn-options-end').addEventListener('click',goToOptions);
+  sel('btn-podium-end').addEventListener('click',showFinalScoreboard);
+}
+
+/* ================================================
+   SCOREBOARD
+================================================ */
+function showFinalScoreboard(){
+  var sorted=Object.keys(G.scores).sort(function(a,b){return G.scores[b]-G.scores[a];});
+  var podiumHtml='';
+  if(sorted.length>=2){
+    var cols=sorted.length>=3?[sorted[1],sorted[0],sorted[2]]:[sorted[1],sorted[0]];
+    var blocks=sorted.length>=3?['p2','p1','p3']:['p2','p1'];
+    var heights=sorted.length>=3?['78px','108px','58px']:['78px','108px'];
+    var emojis=sorted.length>=3?['&#129352;','&#129351;','&#129353;']:['&#129352;','&#129351;'];
+    podiumHtml='<div class="podium">';
+    for(var i=0;i<cols.length;i++){
+      var name=cols[i];
+      podiumHtml+='<div class="podium-col">';
+      podiumHtml+='<div class="podium-name">'+name+'</div>';
+      podiumHtml+='<div class="podium-pts">'+G.scores[name]+' pts</div>';
+      podiumHtml+='<div class="podium-block '+blocks[i]+'" style="height:'+heights[i]+'">'+emojis[i]+'</div>';
+      podiumHtml+='</div>';
+    }
+    podiumHtml+='</div>';
+  }
+  var medals=['&#128081;','&#129352;','&#129353;'];
+  var allRows='';
+  for(var i=0;i<sorted.length;i++){
+    var name=sorted[i];
+    allRows+='<div class="score-row'+(i===0?' leader':'')+'">';
+    allRows+='<div class="score-name">'+(medals[i]||('#'+(i+1)))+' '+name+'</div>';
+    allRows+='<div class="score-pts">'+G.scores[name]+' pt'+(G.scores[name]>1?'s':'')+'</div>';
+    allRows+='</div>';
+  }
+  var html='<h2>&#127942; Classement g&eacute;n&eacute;ral</h2>';
+  html+='<p class="mb">'+G.mancheNum+' manche'+(G.mancheNum>1?'s':'')+' jou&eacute;'+(G.mancheNum>1?'es':'e')+'</p>';
+  html+=podiumHtml;
+  html+='<div class="card"><div class="card-title">Scores</div>'+allRows+'</div>';
+  html+='<button class="btn btn-primary" id="btn-scoreboard-next">Nouvelle manche &#128260;</button>';
+  html+='<button class="btn btn-danger mt" id="btn-scoreboard-reset">Tout remettre &agrave; z&eacute;ro</button>';
+  html+='<button class="btn btn-secondary mt" id="btn-scoreboard-home">Accueil</button>';
+  setHTML('scoreboardContent',html);
+  goTo('s-scoreboard');
+  sel('btn-scoreboard-next').addEventListener('click',nextManche);
+  sel('btn-scoreboard-reset').addEventListener('click',resetAll);
+  sel('btn-scoreboard-home').addEventListener('click',function(){goTo('s-home');});
+}
+
+/* ================================================
+   RESET
+================================================ */
+function resetAll(){
+  G.players=[];G.nbUC=1;G.mrwhite=false;G.hiddenRole=false;
+  G.crossoverPct=50;G.selectedNormalPairs=null;
+  G.game={};G.citizenWord='';G.ucWord='';
+  G.round=1;G.revealIndex=0;G.scores={};G.mancheNum=0;G.lastDeltas={};
+  G.selectedUniverses={};G.selectedGroups={};
+  G.selectedCrossovers={};
+  for(var i=0;i<CROSSOVER_PAIRS.length;i++) G.selectedCrossovers[i]=true;
+  sel('playerList').innerHTML='';
+  sel('playerCount').textContent='';
+  sel('ucCount').textContent='1';
+  sel('mrwhiteToggle').checked=false;
+  sel('hiddenRoleToggle').checked=false;
+  sel('crossoverSlider').value=50;
+  sel('crossoverPctLabel').textContent='50%';
+  sel('btn-home-score').style.display='none';
+  sel('btn-home-reset').style.display='none';
+  goTo('s-home');
+}
+
+/* ================================================
+   INIT & LISTENERS
+================================================ */
+window.onerror=function(msg,src,line){alert('Erreur: '+msg+' (L'+line+')');return true;};
+
+// HOME
+sel('btn-home-start').addEventListener('click',function(){goToOptions();});
+sel('btn-home-score').addEventListener('click',showFinalScoreboard);
+sel('btn-home-reset').addEventListener('click',resetAll);
+
+// SETUP
+sel('playerInput').addEventListener('keydown',function(e){if(e.keyCode===13)addPlayer();});
+sel('btn-add-player').addEventListener('click',addPlayer);
+sel('btn-uc-minus').addEventListener('click',function(){
+  var max=Math.max(1,Math.floor(G.players.length/3));
+  G.nbUC=Math.max(1,G.nbUC-1);sel('ucCount').textContent=G.nbUC;
+});
+sel('btn-uc-plus').addEventListener('click',function(){
+  var max=Math.max(1,Math.floor(G.players.length/3));
+  G.nbUC=Math.min(max,G.nbUC+1);sel('ucCount').textContent=G.nbUC;
+});
+sel('crossoverSlider').addEventListener('input',function(){
+  G.crossoverPct=parseInt(this.value);
+  sel('crossoverPctLabel').textContent=G.crossoverPct+'%';
+});
+sel('btn-pairs').addEventListener('click',function(){goTo('s-pairs');});
+sel('btn-start').addEventListener('click',startGame);
+sel('btn-setup-back').addEventListener('click',function(){goTo('s-home');});
+
+// PAIRS
+sel('tab-normal').addEventListener('click',function(){switchTab('normal');});
+sel('tab-cross').addEventListener('click',function(){switchTab('cross');});
+sel('btn-select-all').addEventListener('click',function(){
+  if(currentTab==='normal'){
+    var uk=uniKeys();
+    if(!G.selectedNormalPairs) G.selectedNormalPairs={};
+    for(var i=0;i<uk.length;i++){
+      if(!G.selectedUniverses[uk[i]]) continue;
+      var pairs=UNIVERSES[uk[i]].pairs;
+      for(var pi=0;pi<pairs.length;pi++) G.selectedNormalPairs[buildNormalPairKey(uk[i],pi)]=true;
+    }
+    renderNormalPairs();
+  } else {
+    for(var ci=0;ci<CROSSOVER_PAIRS.length;ci++){
+      var cp=CROSSOVER_PAIRS[ci];
+      if(G.selectedUniverses[cp.a]&&G.selectedUniverses[cp.b]) G.selectedCrossovers[ci]=true;
+    }
+    renderCrossoversList();
+  }
+});
+sel('btn-deselect-all').addEventListener('click',function(){
+  if(currentTab==='normal'){
+    G.selectedNormalPairs={};renderNormalPairs();
+  } else {
+    for(var ci=0;ci<CROSSOVER_PAIRS.length;ci++){
+      var cp=CROSSOVER_PAIRS[ci];
+      if(G.selectedUniverses[cp.a]&&G.selectedUniverses[cp.b]) delete G.selectedCrossovers[ci];
+    }
+    renderCrossoversList();
+  }
+});
+sel('btn-pairs-back').addEventListener('click',function(){goTo('s-setup');});
+
+// ROUND
+sel('btn-go-vote').addEventListener('click',showVoteScreen);
+
+// VOTE
+sel('confirmElimBtn').addEventListener('click',confirmElim);
+sel('btn-no-elim').addEventListener('click',function(){G.round++;startRound();});
+sel('btn-vote-back').addEventListener('click',function(){goTo('s-round');});
+
+// MR WHITE
+sel('btn-mw-guess').addEventListener('click',checkMWGuess);
+
+function addPlayer(){
+  var inp=sel('playerInput');
+  var name=inp.value.trim();
+  if(!name||G.players.length>=10) return;
+  for(var i=0;i<G.players.length;i++) if(G.players[i]===name) return;
+  G.players.push(name);
+  if(!G.scores[name]) G.scores[name]=0;
+  inp.value='';
+  renderPlayers();
+  inp.focus();
+}
+
+// Init
+initUniverseGrid();
 </script>
 </body>
 </html>
-<!-- v2.1 -->
-<!-- v2.2 -->
-<!-- v3.0 -->
-<!-- v3.1 -->
-<!-- v4.0 -->
-<!-- v4.1 -->
-<!-- v4.2 -->
-<!-- v4.3 -->
-<!-- v5.0 -->
-<!-- v5.1 -->
-<!-- v5.2 -->
-<!-- v5.3 -->
-<!-- v6.0 -->
-<!-- v6.1 -->
